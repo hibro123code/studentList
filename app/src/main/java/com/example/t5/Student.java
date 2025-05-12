@@ -1,5 +1,4 @@
-// In your package (e.g., com.example.t5)
-package com.example.t5; // Replace with your package name
+package com.example.t5;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -7,27 +6,45 @@ import android.os.Parcelable;
 public class Student implements Parcelable {
     private String name;
     private String studentId;
-    private int avatarResId; // Drawable resource ID for student's picture
+    private int avatarResId;
     private String email;
     private String major;
-    private String dateOfBirth;
+    private String dob;
 
-    public Student(String name, String studentId, int avatarResId, String email, String major, String dateOfBirth) {
+    // Constructor
+    public Student(String name, String studentId, int avatarResId, String email, String major, String dob) {
         this.name = name;
         this.studentId = studentId;
         this.avatarResId = avatarResId;
         this.email = email;
         this.major = major;
-        this.dateOfBirth = dateOfBirth;
+        this.dob = dob;
     }
 
     // Getters
-    public String getName() { return name; }
-    public String getStudentId() { return studentId; }
-    public int getAvatarResId() { return avatarResId; }
-    public String getEmail() { return email; }
-    public String getMajor() { return major; }
-    public String getDateOfBirth() { return dateOfBirth; }
+    public String getName() {
+        return name;
+    }
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public int getAvatarResId() {
+        return avatarResId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public String getDob() {
+        return dob;
+    }
 
     // Parcelable implementation
     protected Student(Parcel in) {
@@ -36,7 +53,7 @@ public class Student implements Parcelable {
         avatarResId = in.readInt();
         email = in.readString();
         major = in.readString();
-        dateOfBirth = in.readString();
+        dob = in.readString();
     }
 
     @Override
@@ -46,7 +63,7 @@ public class Student implements Parcelable {
         dest.writeInt(avatarResId);
         dest.writeString(email);
         dest.writeString(major);
-        dest.writeString(dateOfBirth);
+        dest.writeString(dob);
     }
 
     @Override

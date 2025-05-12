@@ -1,4 +1,4 @@
-package com.example.t5; // Replace with your package name
+package com.example.t5;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,66 +21,93 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     ListView studentListView;
-    List<Student> students; // Use a List of Student objects
+    List<Student> students;
+    StudentListAdapter adapter;
+    StudentDbHelper dbHelper;
 
-    // Sample avatar drawables (make sure you have these in res/drawable)
-    // You can reuse your ic1, ic2, etc., or create new ones.
-    // For simplicity, I'm using the existing ones.
+    private long lastClickTime = 0;
+    private int lastClickPosition = -1;
+    private static final long DOUBLE_CLICK_TIME_DELTA = 300;
+
     int[] avatars = {
-            R.drawable.ic1,
-            R.drawable.ic2,
-            R.drawable.ic3,
-            R.drawable.ic4,
-            R.drawable.ic5,
-            R.drawable.ic6
+            R.drawable.ic1, R.drawable.ic2, R.drawable.ic3,
+            R.drawable.ic4, R.drawable.ic5, R.drawable.ic6
     };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main); // Assuming activity_main.xml has your ListView
+        setContentView(R.layout.activity_main);
 
-        studentListView = findViewById(R.id.androidVersionsList); // Keep your ListView ID or change it
+        studentListView = findViewById(R.id.androidVersionsList);
+        dbHelper = new StudentDbHelper(this);
 
-        // Initialize student data
-        students = new ArrayList<>();
-        students.add(new Student("Nguyen Duy Phuc", "21200331", avatars[0], "21200331@student.hcmus.edu.vn", "Electronics and Telecommunications", "30/09/2003"));
-        students.add(new Student("Tran Van Tien", "21180023", avatars[1], "21180023@student.hcmus.edu.vn", "Physical", "22/07/2003"));
-        students.add(new Student("Le Thu Van", "22001013", avatars[2], "22001013@student.hcmus.edu.vn", "Information Technology", "10/11/2004"));
-        students.add(new Student("Tran Hung Dao", "21801234", avatars[3], "21801234@student.hcmus.edu.vn", "Data Science", "05/01/2003"));
-        students.add(new Student("Nguyen Thi Ha", "21180234", avatars[4], "21180234@student.hcmus.edu.vn", "Biology", "30/09/2003"));
-        students.add(new Student("Nguyen Quang Tuan", "21160204", avatars[5], "21160204@student.hcmus.edu.vn", "Chemistry", "12/06/2003"));
+        loadStudentsFromDb();
 
+        if (students == null) {
+            students = new ArrayList<>();
+        }
 
-        StudentListAdapter adapter = new StudentListAdapter(this, students);
+        adapter = new StudentListAdapter(this, students);
         studentListView.setAdapter(adapter);
 
-        // Set item click listener
         studentListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Student selectedStudent = students.get(position);
+                long clickTime = System.currentTimeMillis();
 
-                Intent intent = new Intent(MainActivity.this, StudentDetailActivity.class);
-                intent.putExtra(StudentDetailActivity.EXTRA_STUDENT, selectedStudent);
-                startActivity(intent);
+                if (position == lastClickPosition && (clickTime - lastClickTime) < DOUBLE_CLICK_TIME_DELTA) {
+                    Student selectedStudent = students.get(position);
+                    Intent intent = new Intent(MainActivity.this, StudentDetailActivity.class);
+                    intent.putExtra(StudentDetailActivity.EXTRA_STUDENT, selectedStudent);
+                    startActivity(intent);
+
+                    lastClickTime = 0;
+                    lastClickPosition = -1;
+                }
+                lastClickTime = clickTime;
+                lastClickPosition = position;
             }
         });
     }
 
-    // Renamed and modified CustomListAdapter to StudentListAdapter
-    class StudentListAdapter extends ArrayAdapter<Student> {
+    private void loadStudentsFromDb() {
+        if (dbHelper.getStudentCount() == 0) {
+            populateInitialData();
+        }
+        students = dbHelper.getAllStudents();
+        if (students == null) {
+            students = new ArrayList<>();
+        }
+    }
 
+    private void populateInitialData() {
+        int avatar1 = (avatars.length > 0) ? avatars[0] : R.mipmap.ic_launcher;
+        int avatar2 = (avatars.length > 1) ? avatars[1] : R.mipmap.ic_launcher;
+        int avatar3 = (avatars.length > 2) ? avatars[2] : R.mipmap.ic_launcher;
+        int avatar4 = (avatars.length > 3) ? avatars[3] : R.mipmap.ic_launcher;
+        int avatar5 = (avatars.length > 4) ? avatars[4] : R.mipmap.ic_launcher;
+        int avatar6 = (avatars.length > 5) ? avatars[5] : R.mipmap.ic_launcher;
+
+        dbHelper.addStudent(new Student("Nguyen Duy Phuc", "21200331", avatar1, "21200331@student.hcmus.edu.vn", "Electronics and Telecommunications", "30/09/2003"));
+        dbHelper.addStudent(new Student("Tran Van Tien", "21180023", avatar2, "21180023@student.hcmus.edu.vn", "Physical", "22/07/2003"));
+        dbHelper.addStudent(new Student("Le Thu Van", "22001013", avatar3, "22001013@student.hcmus.edu.vn", "Information Technology", "10/11/2004"));
+        dbHelper.addStudent(new Student("Tran Hung Dao", "21801234", avatar4, "21801234@student.hcmus.edu.vn", "Data Science", "05/01/2003"));
+        dbHelper.addStudent(new Student("Nguyen Thi Ha", "21180234", avatar5, "21180234@student.hcmus.edu.vn", "Biology", "30/09/2003"));
+        dbHelper.addStudent(new Student("Nguyen Quang Tuan", "21160204", avatar6, "21160204@student.hcmus.edu.vn", "Chemistry", "12/06/2003"));
+    }
+
+
+    class StudentListAdapter extends ArrayAdapter<Student> {
         Context context;
-        List<Student> studentList; // Use List<Student>
+        List<Student> studentList;
         LayoutInflater inflater;
 
-        // Constructor now takes List<Student>
         StudentListAdapter(Context context, List<Student> studentList) {
-            super(context, R.layout.student_list_item, studentList); // Use student_list_item.xml
+            super(context, R.layout.student_list_item, studentList);
             this.context = context;
             this.studentList = studentList;
-            inflater = LayoutInflater.from(context);
+            this.inflater = LayoutInflater.from(context);
         }
 
         @NonNull
@@ -89,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
             ViewHolder viewHolder;
 
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.student_list_item, parent, false); // Use student_list_item.xml
+                convertView = inflater.inflate(R.layout.student_list_item, parent, false);
                 viewHolder = new ViewHolder();
                 viewHolder.avatarView = convertView.findViewById(R.id.imageViewAvatar);
                 viewHolder.nameText = convertView.findViewById(R.id.textViewStudentName);
@@ -101,14 +128,18 @@ public class MainActivity extends AppCompatActivity {
 
             Student currentStudent = studentList.get(position);
 
-            viewHolder.avatarView.setImageResource(currentStudent.getAvatarResId());
-            viewHolder.nameText.setText(currentStudent.getName());
-            viewHolder.idText.setText("ID: " + currentStudent.getStudentId());
-
+            if (currentStudent != null) {
+                viewHolder.avatarView.setImageResource(currentStudent.getAvatarResId());
+                viewHolder.nameText.setText(currentStudent.getName());
+                viewHolder.idText.setText("ID: " + currentStudent.getStudentId());
+            } else {
+                viewHolder.nameText.setText("N/A");
+                viewHolder.idText.setText("ID: N/A");
+                viewHolder.avatarView.setImageResource(R.mipmap.ic_launcher);
+            }
             return convertView;
         }
 
-        // ViewHolder for student list item
         private class ViewHolder {
             ImageView avatarView;
             TextView nameText;

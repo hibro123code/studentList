@@ -1,47 +1,58 @@
-// In your package (e.g., com.example.t5)
-package com.example.t5; // Replace with your package name
+package com.example.t5;
 
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 public class StudentDetailActivity extends AppCompatActivity {
 
-    public static final String EXTRA_STUDENT = "com.example.t5.STUDENT_DETAIL";
+    public static final String EXTRA_STUDENT = "com.example.t5.EXTRA_STUDENT";
 
-    private ImageView detailImageViewAvatar;
-    private TextView detailTextViewName;
-    private TextView detailTextViewStudentId;
-    private TextView detailTextViewEmail;
-    private TextView detailTextViewMajor;
-    private TextView detailTextViewDOB;
+    private ImageView avatarImageView;
+    private TextView nameTextView;
+    private TextView idTextView;
+    private TextView emailTextView;
+    private TextView majorTextView;
+    private TextView dobTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_detail);
 
-        detailImageViewAvatar = findViewById(R.id.detailImageViewAvatar);
-        detailTextViewName = findViewById(R.id.detailTextViewName);
-        detailTextViewStudentId = findViewById(R.id.detailTextViewStudentId);
-        detailTextViewEmail = findViewById(R.id.detailTextViewEmail);
-        detailTextViewMajor = findViewById(R.id.detailTextViewMajor);
-        detailTextViewDOB = findViewById(R.id.detailTextViewDOB);
+        avatarImageView = findViewById(R.id.detailImageViewAvatar);
+        nameTextView = findViewById(R.id.detailTextViewName);
+        idTextView = findViewById(R.id.detailTextViewStudentId);
+        emailTextView = findViewById(R.id.detailTextViewEmail);
+        majorTextView = findViewById(R.id.detailTextViewMajor);
+        dobTextView = findViewById(R.id.detailTextViewDOB);
 
         Student student = getIntent().getParcelableExtra(EXTRA_STUDENT);
 
         if (student != null) {
-            setTitle("Student Details"); // Set activity title
-            detailImageViewAvatar.setImageResource(student.getAvatarResId());
-            detailTextViewName.setText("Name: " + student.getName());
-            detailTextViewStudentId.setText("ID: " + student.getStudentId());
-            detailTextViewEmail.setText("Email: " + student.getEmail());
-            detailTextViewMajor.setText("Major: " + student.getMajor());
-            detailTextViewDOB.setText("Date of Birth: " + student.getDateOfBirth());
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle(student.getName());
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
+
+            avatarImageView.setImageResource(student.getAvatarResId());
+            nameTextView.setText(nameTextView.getText() + student.getName());
+            idTextView.setText(idTextView.getText() + student.getStudentId());
+            emailTextView.setText(emailTextView.getText() + student.getEmail());
+            majorTextView.setText(majorTextView.getText() + student.getMajor());
+            dobTextView.setText(dobTextView.getText() + student.getDob());
         } else {
-            setTitle("Error");
-            detailTextViewName.setText("No student data found.");
+            Toast.makeText(this, "Error: Student data not found.", Toast.LENGTH_LONG).show();
+            finish();
         }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }
